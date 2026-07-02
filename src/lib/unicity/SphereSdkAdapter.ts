@@ -36,6 +36,7 @@ export class SphereSdkAdapter implements UnicityAdapter {
 
       // Initialize the wallet
       const { sphere, created, generatedMnemonic } = await Sphere.init({
+        network: "testnet",
         ...providers,
         mnemonic: mnemonic || undefined,
         autoGenerate: mnemonic ? false : true,
