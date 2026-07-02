@@ -1,0 +1,36 @@
+{
+  "name": "dealbot-unicity",
+  "version": "1.0.0",
+  "description": "DealBot: Autonomous P2P Negotiation and Settlement on Unicity Testnet v2",
+  "main": "dist/scripts/run-agents.js",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "agents": "node --loader ts-node/esm scripts/run-agents.ts",
+    "seed": "node --loader ts-node/esm scripts/seed-demo.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@unicitylabs/sphere-sdk": "^0.11.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.378.0",
+    "next": "^14.2.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwind-merge": "^2.3.0",
+    "ws": "^8.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  }
+}

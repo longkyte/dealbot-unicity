@@ -1,0 +1,35 @@
+[package]
+name = "buyer-bot-capsule"
+version = "1.0.0"
+description = "Autonomous Unicity Buyer Agent Capsule"
+
+[[component]]
+id = "buyer-bot"
+file = "dist/buyer-bot.wasm"
+type = "executable"
+
+[capabilities]
+# Limit HTTP/TCP network access strictly to Unicity gateways and Nostr relays
+network_allow = [
+    "market-api.unicity.network:443",
+    "testnet-gateway.unicity.network:443",
+    "relay.unicity.network:443",
+    "relay.nostr.band:443"
+]
+
+# Allow persistent local storage access for token files and negotiation transcripts
+kv_allow = [
+    "db.json",
+    "wallet-data-buyer/*"
+]
+
+# Bound key-derivation capabilities
+key_derivation = [
+    "m/44'/0'/0'/0/0"
+]
+
+# Restrict the total UCT tokens this capsule is allowed to spend during negotiations
+[guards]
+max_single_deal_value = "100000000" # 100 UCT in smallest units
+max_cumulative_spend = "500000000"  # 500 UCT total budget
+timeout_seconds = 300

@@ -1,0 +1,12 @@
+[workspace]
+members = [
+    "buyer-bot-capsule",
+    "seller-bot-capsule"
+]
+
+[package]
+name = "dealbot-workspace"
+version = "1.0.0"
+description = "DealBot Workspace Capsule for AstridOS AI Agent kernel"
+author = "DealBot Team"
+license = "MIT"
