@@ -64,24 +64,60 @@ export default function Dashboard() {
     }
   };
 
-  const startPolling = (dealId: string) => {
+  const runPlayback = (fullDeal: DealRecord) => {
     stopPolling();
-    pollIntervalRef.current = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/deals/${dealId}`);
-        const data = await res.json();
-        if (data.success) {
-          setActiveDeal(data.deal);
-          if (data.deal.status !== "active") {
-            stopPolling();
-            setIsRunning(false);
-            fetchHistory(); // Refresh history
-          }
-        }
-      } catch (e) {
-        console.error("Polling error", e);
+    setIsRunning(true);
+
+    const tempDeal: DealRecord = {
+      ...fullDeal,
+      status: "active",
+      settlementStatus: "pending",
+      timeline: [],
+      transcript: []
+    };
+    setActiveDeal(tempDeal);
+
+    let timelineIdx = 0;
+    let transcriptIdx = 0;
+    const maxSteps = fullDeal.timeline.length;
+
+    const interval = setInterval(() => {
+      if (timelineIdx >= maxSteps) {
+        clearInterval(interval);
+        setActiveDeal(fullDeal);
+        setIsRunning(false);
+        fetchHistory(); // Refresh history
+        return;
       }
-    }, 800);
+
+      const nextTimelineEvent = fullDeal.timeline[timelineIdx];
+      let nextTranscript = [...tempDeal.transcript];
+
+      if (nextTimelineEvent.type === "dm" && transcriptIdx < fullDeal.transcript.length) {
+        nextTranscript.push(fullDeal.transcript[transcriptIdx]);
+        transcriptIdx++;
+      }
+
+      const updatedTimeline = [...tempDeal.timeline, nextTimelineEvent];
+      tempDeal.timeline = updatedTimeline;
+      tempDeal.transcript = nextTranscript;
+
+      if (nextTimelineEvent.type === "agreement" || nextTimelineEvent.type === "success") {
+        tempDeal.status = "completed";
+        tempDeal.settlementStatus = fullDeal.settlementStatus;
+        tempDeal.finalPrice = fullDeal.finalPrice;
+        tempDeal.txId = fullDeal.txId;
+        tempDeal.escrowId = fullDeal.escrowId;
+      } else if (nextTimelineEvent.type === "fail" || nextTimelineEvent.type === "error") {
+        tempDeal.status = "failed";
+        tempDeal.settlementStatus = "failed";
+      }
+
+      setActiveDeal({ ...tempDeal });
+      timelineIdx++;
+    }, 600);
+
+    pollIntervalRef.current = interval;
   };
 
   const stopPolling = () => {
@@ -107,12 +143,12 @@ export default function Dashboard() {
         })
       });
       const data = await response.json();
-      if (data.success) {
+      if (data.success && data.deal) {
         setActiveDealId(data.dealId);
-        startPolling(data.dealId);
+        runPlayback(data.deal);
       } else {
         setIsRunning(false);
-        alert(`Failed to start agents: ${data.error}`);
+        alert(`Failed to start agents: ${data.error || "Unknown error"}`);
       }
     } catch (e: any) {
       setIsRunning(false);

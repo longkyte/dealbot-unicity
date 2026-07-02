@@ -32,13 +32,10 @@ export async function POST(request: Request) {
       strategy: seller.strategy
     };
 
-    // Run agents in the background so the HTTP response is instant,
-    // and write state changes into the file database (DealStore).
-    AgentRunner.run(buyerPolicy, sellerPolicy, isSimulation, dealId).catch(err => {
-      console.error("Agent execution failed in background:", err);
-    });
+    // Execute negotiation loop synchronously to survive serverless function lifespans
+    const dealResult = await AgentRunner.run(buyerPolicy, sellerPolicy, isSimulation, dealId);
 
-    return NextResponse.json({ success: true, dealId });
+    return NextResponse.json({ success: true, dealId, deal: dealResult });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
